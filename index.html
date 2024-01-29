@@ -84,6 +84,51 @@
       let username;
       let chatHistory = {};
 
+      const typingIndicator = document.createElement('li');
+      typingIndicator.id = 'typing-indicator';
+      typingIndicator.style.display = 'none';
+
+      document.getElementById('messages').appendChild(typingIndicator);
+
+      input.addEventListener('input', () => {
+        if (input.value) {
+          socket.emit('typing', window.username);
+        } else {
+          socket.emit('stop typing', window.username);
+        }
+      });
+
+      input.addEventListener('focusout', () => {
+        socket.emit('stop typing', window.username);
+      });
+
+      input.addEventListener('input', () => {
+        if (input.value) {
+          socket.emit('typing', window.username); // Envoyer l'événement 'typing' au serveur
+        } else {
+          socket.emit('stop typing', window.username); // Envoyer l'événement 'stop typing' au serveur
+        }
+      });
+
+      // Gérez l'événement 'user typing' côté client
+      socket.on('user typing', (username) => {
+        const typingIndicator = document.getElementById('typing-indicator');
+        typingIndicator.textContent = `${username} is typing...`; // Afficher le message de saisie
+        typingIndicator.style.display = ''; // Afficher l'indicateur de saisie
+
+        // Déplacer l'indicateur de saisie à la fin de la liste des messages
+        const messages = document.getElementById('messages');
+        messages.appendChild(typingIndicator);
+      });
+
+      // Gérez l'événement 'user stop typing' côté client
+      socket.on('user stop typing', (username) => {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator.textContent === `${username} is typing...`) {
+          typingIndicator.style.display = 'none'; // Masquer l'indicateur de saisie
+        }
+      });
+      
       function openPrivateChatWindow(username) {
         // Obtenez la conversation générale
         const generalChat = document.getElementById('chat');
@@ -110,6 +155,17 @@
         // Affichez le bouton pour revenir à la conversation générale
         const generalChatButton = document.getElementById('generalChatButton');
         generalChatButton.style.display = 'inline';
+
+        fetch(`/private-messages/${window.username}/${username}`)
+        .then(response => response.json())
+        .then(messages => {
+            messages.forEach(msg => {
+                const item = document.createElement('li');
+                item.textContent = msg.sender + ": " + msg.message;
+                messages.appendChild(item);
+            });
+        });
+
       }
 
       
