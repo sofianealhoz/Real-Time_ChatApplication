@@ -35,11 +35,13 @@ Start chatting with other online users in real-time.
 
 View the list of online users on the right side of the chat interface.
 
-Chatt also in privacy by clicking on usernames.
+Chatt also in privacy by clicking on usernames (work in progress).
+
+See in real time when another user is typing a message. 
 
 ## Features
 
-User Authentication: Users can sign up and log in securely with a username and password.
+User Authentication: Users can sign up and log in securely with a username and password (Users that are already present in the database have the username as password aswell).
 
 Real-time Chat: Utilizes Socket.IO for real-time communication, enabling users to exchange messages instantly.
 
