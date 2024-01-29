@@ -4,6 +4,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Socket.IO chat</title>
     <style>
+      #home { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+      #home button { margin: 1rem; }
+
       body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
       #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
@@ -17,38 +20,98 @@
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
-    </form>
+    <div id="home">
+      <button id="signup">Sign Up</button>
+      <button id="login">Login</button>
+    </div>
+    <div id="chat" style="display: none;">
+      <ul id="messages"></ul>
+      <form id="form" action="">
+        <input id="input" autocomplete="off" /><button>Send</button>
+      </form>
+    </div>
+    <div id="loginForm" style="display: none;">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username">
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password">
+      <input type="checkbox" id="showPassword"> Show password
+      <button id="submitLogin">Login</button>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io({
-          auth: {
-            serverOffset: 0
+      const socket = io({
+        auth: {
+          serverOffset: 0
+        }
+      });
+    
+      const form = document.getElementById('form');
+      const input = document.getElementById('input');
+      const messages = document.getElementById('messages');
+      let username;
+    
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit('chat message', {username: window.username, content: input.value});
+          input.value = '';
+        }
+      });
+    
+      socket.on('chat message', (msg) => {
+        const item = document.createElement('li');
+        item.textContent = msg.username + ": " + msg.content; // Concatenate username and message content
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      // Nouveau code pour gérer les clics sur les boutons de connexion et d'inscription
+      document.getElementById('signup').addEventListener('click', () => {
+        const username = prompt('Enter your username');
+        const password = prompt('Enter your password');
+        fetch('/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        }).then(response => response.text()).then(message => alert(message));
+      });
+
+      document.getElementById('showPassword').addEventListener('change', (event) => {
+        const passwordInput = document.getElementById('password');
+        if (event.target.checked) {
+          passwordInput.type = 'text';
+        } else {
+          passwordInput.type = 'password';
+        }
+      });
+      
+      document.getElementById('login').addEventListener('click', () => {
+        document.getElementById('home').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+      });
+
+      document.getElementById('submitLogin').addEventListener('click', () => {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        }).then(response => {
+          if (response.ok) {
+            // Cachez le formulaire de connexion et affichez la page de chat
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('chat').style.display = 'block';
+            // Stockez le nom d'utilisateur dans une variable globale
+            window.username = username;
+            // Votre code pour initialiser la page de chat...
+          } else {
+            response.text().then(message => alert(message));
           }
         });
-      
-        const form = document.getElementById('form');
-        const input = document.getElementById('input');
-        const messages = document.getElementById('messages');
-      
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          if (input.value) {
-            socket.emit('chat message', input.value);
-            input.value = '';
-          }
-        });
-      
-        socket.on('chat message', (msg, serverOffset) => {
-          const item = document.createElement('li');
-          item.textContent = msg;
-          messages.appendChild(item);
-          window.scrollTo(0, document.body.scrollHeight);
-          socket.auth.serverOffset = serverOffset;
-        });
-      </script>
+      });
+    </script>    
   </body>
 </html>
 
