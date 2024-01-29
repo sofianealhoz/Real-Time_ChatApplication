@@ -4,7 +4,8 @@ const { join } = require('path');
 const { Server } = require('socket.io');
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
-const bodyParser = require('body-parser'); 
+const bodyParser = require('body-parser');
+const connectedUsers = new Set();
 
 
 async function main() {
@@ -41,29 +42,42 @@ async function main() {
     }
   });
 
-  // Connexion
   app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-      // Vérifier les informations d'authentification
       const user = await db.get('SELECT * FROM users WHERE username = ? AND password = ?', username, password);
       if (user) {
+        connectedUsers.add(username);
+        io.emit('user list', Array.from(connectedUsers));
+        io.emit('login success', username);
+        //socket.username = username; // Définir le nom d'utilisateur du socket
         res.status(200).send('User logged in successfully');
       } else {
         res.status(401).send('Invalid username or password');
       }
     } catch (e) {
-      // Envoyer une erreur si la connexion échoue
       res.status(500).send('Error logging in');
     }
   });
 
   io.on('connection', async (socket) => {
-    io.emit('chat message', {username: 'System', content: 'Un nouvel utilisateur s\'est connecté'});
-    socket.on('disconnect', () => {
-      io.emit('chat message', {username: 'System', content: 'Un utilisateur s\'est déconnecté'});
+    //io.emit('user list', Array.from(connectedUsers)); // Émettre la liste des utilisateurs connectés à tous les clients
+    //io.emit('chat message', {username: 'System', content: 'Un nouvel utilisateur s\'est connecté'});
+    socket.on('user connected', (username) => {
+      socket.username = username;
+      io.emit('chat message', {username: 'System', content: socket.username + ' s\'est connecté'});
+      connectedUsers.add(username);
+      io.emit('user list', Array.from(connectedUsers));
     });
 
+    socket.on('disconnect', () => {
+      if (socket.username) {
+        connectedUsers.delete(socket.username); // Retirer l'utilisateur de l'ensemble des utilisateurs connectés
+        io.emit('user list', Array.from(connectedUsers)); // Émettre la nouvelle liste des utilisateurs connectés à tous les clients
+        io.emit('chat message', {username: 'System', content: socket.username + ' s\'est déconnecté'}); // Émettre un message indiquant que l'utilisateur s'est déconnecté
+      }
+    });
+    
     socket.on('chat message', async (msg) => {
       console.log('Received message:', msg);
       try {

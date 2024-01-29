@@ -13,6 +13,17 @@
       #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
       #input:focus { outline: none; }
       #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+      
+      #chat {
+        width: 50%; /* La section de chat prendra la moitié de la largeur */
+        border-right: 1px solid #ccc; /* Ajoute une bordure à droite de la section de chat */
+      }
+
+      #userList {
+        position: fixed; /* La liste des utilisateurs sera fixée à une position spécifique */
+        top: 50px; /* La liste des utilisateurs sera positionnée à 50px du haut de l'écran */
+        right: 25%; /* La liste des utilisateurs sera positionnée à 25% de la droite de l'écran */
+      }
 
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages > li { padding: 0.5rem 1rem; }
@@ -38,6 +49,10 @@
       <input type="checkbox" id="showPassword"> Show password
       <button id="submitLogin">Login</button>
     </div>
+    <div id="userList" style="display: none;">
+      <h2>Users Online:</h2>
+      <ul id="usersOnline"></ul>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io({
@@ -50,15 +65,15 @@
       const input = document.getElementById('input');
       const messages = document.getElementById('messages');
       let username;
-    
+      
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         if (input.value) {
-          socket.emit('chat message', {username: window.username, content: input.value});
+          socket.emit('chat message', { username: window.username, content: input.value });
           input.value = '';
         }
       });
-    
+
       socket.on('chat message', (msg) => {
         const item = document.createElement('li');
         item.textContent = msg.username + ": " + msg.content; // Concatenate username and message content
@@ -86,9 +101,27 @@
         }
       });
       
+      socket.once('login success', (username) => {
+        document.getElementById('chat').style.display = 'block';
+        document.getElementById('userList').style.display = 'block';
+        socket.emit('user connected', username);
+        socket.username = username; // Définir le nom d'utilisateur du socket
+      });
+      
       document.getElementById('login').addEventListener('click', () => {
         document.getElementById('home').style.display = 'none';
         document.getElementById('loginForm').style.display = 'block';
+      });
+
+      socket.on('user list', (users) => {
+        const userList = document.getElementById('usersOnline');
+        userList.innerHTML = ''; // Effacer la liste actuelle des utilisateurs
+        
+        users.forEach(user => {
+            const item = document.createElement('li');
+            item.textContent = user;
+            userList.appendChild(item);
+        });
       });
 
       document.getElementById('submitLogin').addEventListener('click', () => {
@@ -105,7 +138,8 @@
             document.getElementById('chat').style.display = 'block';
             // Stockez le nom d'utilisateur dans une variable globale
             window.username = username;
-            // Votre code pour initialiser la page de chat...
+            // Émettez l'événement 'login' avec le nom d'utilisateur
+            socket.emit('login', username);
           } else {
             response.text().then(message => alert(message));
           }
