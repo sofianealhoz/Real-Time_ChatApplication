@@ -14,6 +14,16 @@
       #input:focus { outline: none; }
       #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
       
+      #allUsers {
+        position: fixed;
+        bottom: 50px; /* Positionne le div à 50px du bas de l'écran */
+        right: 20%; /* Aligne le div avec la liste des utilisateurs connectés */
+        width: 20%; /* Définit la largeur du div à 20% de la largeur de l'écran */
+        text-align: center; /* Centre le texte à l'intérieur du div */
+        height: 50%; /* Définit la hauteur du div à 50% de la hauteur de l'écran */
+        overflow-y: auto; /* Ajoute une barre de défilement si le contenu dépasse la hauteur du div */
+      }
+      
       #chat {
         width: 50%; /* La section de chat prendra la moitié de la largeur */
         border-right: 1px solid #ccc; /* Ajoute une bordure à droite de la section de chat */
@@ -36,9 +46,11 @@
       <button id="login">Login</button>
     </div>
     <div id="chat" style="display: none;">
+      <h2 id="chat-title">General Chat</h2>
+      <button id="generalChatButton" style="display: none;">Back to General Chat</button>
       <ul id="messages"></ul>
       <form id="form" action="">
-        <input id="input" autocomplete="off" /><button>Send</button>
+        <input id="input" autocomplete="off" /><button id="send">Send</button>
       </form>
     </div>
     <div id="loginForm" style="display: none;">
@@ -53,6 +65,11 @@
       <h2>Users Online:</h2>
       <ul id="usersOnline"></ul>
     </div>
+    <div id="allUsers" style="display: none;">
+      <h2>All Users:</h2>
+      <ul id="users"></ul>
+    </div>
+    <div id="chatContainer" style="display: none;"></div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io({
@@ -65,6 +82,36 @@
       const input = document.getElementById('input');
       const messages = document.getElementById('messages');
       let username;
+      let chatHistory = {};
+
+      function openPrivateChatWindow(username) {
+        // Obtenez la conversation générale
+        const generalChat = document.getElementById('chat');
+
+        // Changez le titre de la conversation
+        const chatTitle = generalChat.querySelector('#chat-title');
+        chatTitle.textContent = `Private conversation with ${username}`;
+
+        // Avant de vider les messages de la conversation, stockez-les dans chatHistory
+        const chatMessages = generalChat.querySelector('#messages');
+        chatHistory[chatTitle.textContent] = Array.from(chatMessages.children);
+
+        // Videz les messages de la conversation
+        chatMessages.innerHTML = '';
+
+        // Changez l'ID de l'input de la conversation
+        const chatInput = generalChat.querySelector('#input');
+        chatInput.id = `input-${username}`;
+
+        // Changez l'ID du bouton de la conversation
+        const chatSend = generalChat.querySelector('#send');
+        chatSend.id = `send-${username}`;
+
+        // Affichez le bouton pour revenir à la conversation générale
+        const generalChatButton = document.getElementById('generalChatButton');
+        generalChatButton.style.display = 'inline';
+      }
+
       
       form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -78,9 +125,62 @@
         const item = document.createElement('li');
         item.textContent = msg.username + ": " + msg.content; // Concatenate username and message content
         messages.appendChild(item);
+        // Après avoir ajouté un nouveau message, mettez à jour chatHistory
+        const currentChatUser = chatTitle.textContent === 'General Chat' ? 'General Chat' : msg.username;
+        if (!chatHistory[currentChatUser]) {
+          chatHistory[currentChatUser] = [];
+        }
+        chatHistory[currentChatUser].push(item);
         window.scrollTo(0, document.body.scrollHeight);
       });
 
+      const chatTitle = document.querySelector('#chat-title');
+      document.getElementById('generalChatButton').addEventListener('click', () => {
+          // Obtenez la conversation générale
+          const generalChat = document.getElementById('chat');
+
+          // Réinitialisez le titre de la conversation
+          const chatTitle = generalChat.querySelector('#chat-title');
+          chatTitle.textContent = 'General Chat';
+
+          // Obtenez les messages de la conversation
+          const chatMessages = generalChat.querySelector('#messages');
+
+          // Avant de vider les messages de la conversation, stockez-les dans chatHistory
+          const currentChatUser = chatTitle.textContent.replace('Private conversation with ', '');
+          chatHistory[currentChatUser] = Array.from(chatMessages.children);
+
+          // Videz les messages de la conversation
+          chatMessages.innerHTML = '';
+
+          // Réinitialisez l'ID de l'input de la conversation
+          let chatInput = generalChat.querySelector('#input');
+          if (!chatInput) {
+              chatInput = generalChat.querySelector('#input-username'); // or the new ID
+          }
+          if (chatInput) {
+              chatInput.id = 'input';
+          }
+
+          // Réinitialisez l'ID du bouton de la conversation
+          let chatSend = generalChat.querySelector('#send');
+          if (!chatSend) {
+              chatSend = generalChat.querySelector('#send-username'); // or the new ID
+          }
+          if (chatSend) {
+              chatSend.id = 'send';
+          }
+
+          // Après avoir réinitialisé le titre de la conversation, restaurez les messages de la conversation générale
+          const generalChatMessages = chatHistory['General Chat'] || [];
+          generalChatMessages.forEach(messageElement => chatMessages.appendChild(messageElement));
+
+          // Cachez le bouton pour revenir à la conversation générale
+          const generalChatButton = document.getElementById('generalChatButton');
+          generalChatButton.style.display = 'none';
+      });
+
+      
       // Nouveau code pour gérer les clics sur les boutons de connexion et d'inscription
       document.getElementById('signup').addEventListener('click', () => {
         const username = prompt('Enter your username');
@@ -106,6 +206,26 @@
         document.getElementById('userList').style.display = 'block';
         socket.emit('user connected', username);
         socket.username = username; // Définir le nom d'utilisateur du socket
+
+        // Récupérer et afficher la liste des utilisateurs
+        fetch('/users')
+          .then(response => response.json())
+          .then(users => {
+            const userList = document.getElementById('users');
+            users.forEach(user => {
+              const item = document.createElement('li');
+              const link = document.createElement('a');
+              link.textContent = user.username;
+              link.href = '#';
+              link.addEventListener('click', (e) => {
+                e.preventDefault();
+                openPrivateChatWindow(user.username);
+              });
+              item.appendChild(link);
+              userList.appendChild(item);
+            });
+            document.getElementById('allUsers').style.display = 'block';
+          });
       });
       
       document.getElementById('login').addEventListener('click', () => {

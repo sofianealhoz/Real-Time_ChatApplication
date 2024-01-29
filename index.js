@@ -16,7 +16,7 @@ async function main() {
 
   await db.run('CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY, username TEXT, content TEXT)');
   await db.run('CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT)');
-  db.run(`delete from messages`);
+  //db.run(`delete from messages`);
 
   const app = express();
   const server = createServer(app);
@@ -27,6 +27,15 @@ async function main() {
   
   app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
+  });
+
+  app.get('/users', async (req, res) => {
+    try {
+      const users = await db.all('SELECT username FROM users');
+      res.status(200).json(users);
+    } catch (e) {
+      res.status(500).send('Error retrieving users');
+    }
   });
 
   // Inscription
@@ -65,7 +74,7 @@ async function main() {
     //io.emit('chat message', {username: 'System', content: 'Un nouvel utilisateur s\'est connecté'});
     socket.on('user connected', (username) => {
       socket.username = username;
-      io.emit('chat message', {username: 'System', content: socket.username + ' s\'est connecté'});
+      io.emit('chat message', {username: 'System', content: socket.username + ' s\'est connecté(e)'});
       connectedUsers.add(username);
       io.emit('user list', Array.from(connectedUsers));
     });
@@ -74,7 +83,7 @@ async function main() {
       if (socket.username) {
         connectedUsers.delete(socket.username); // Retirer l'utilisateur de l'ensemble des utilisateurs connectés
         io.emit('user list', Array.from(connectedUsers)); // Émettre la nouvelle liste des utilisateurs connectés à tous les clients
-        io.emit('chat message', {username: 'System', content: socket.username + ' s\'est déconnecté'}); // Émettre un message indiquant que l'utilisateur s'est déconnecté
+        io.emit('chat message', {username: 'System', content: socket.username + ' s\'est déconnecté(e)'}); // Émettre un message indiquant que l'utilisateur s'est déconnecté
       }
     });
     
