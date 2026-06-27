@@ -1,0 +1,24 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+.npm/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Local / test databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Editors / OS
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
