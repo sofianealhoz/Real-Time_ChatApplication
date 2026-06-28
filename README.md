@@ -1,50 +1,27 @@
-# NodeJS_Project
+# Real-Time Chat Application
+
+Real-time chat application with live messaging and typing indicators, built
+on WebSockets.
+
+## Stack
+
+- Node.js, Express
+- WebSocket (real-time messaging)
+- SQLite (storage)
 
 ## Prerequisites
 
-You will need Node.js and npm installed on your machine. You can download and install them from [https://nodejs.org/](https://nodejs.org/).
+Node.js and npm installed (https://nodejs.org/).
 
-## Installation
+## Install and run
 
-1. Clone the repository:
-    ```
-    git clone git@devops.telecomste.fr:alhoz.sofiane/projet-nodejs_ezzar-alhoz.git
-    ```
-2. Navigate into the project directory:
-    ```
-    cd projet-nodejs_ezzar-alhoz
-    ```
-3. Install the dependencies:
-    ```
-    npm install express@4
-    ```
+    git clone https://github.com/sofianealhoz/Real-Time_ChatApplication.git
+    cd Real-Time_ChatApplication
+    npm install
+    npm start
 
-## Starting the Project
+Then open the application in your browser.
 
-1. To start the server, run:
-    ```
-    node index.js
-    ```
-2. Open your browser and navigate to `http://localhost:3000` (or whichever URL you've configured).
+## Note
 
-## Usage
-
-Sign up or log in with an existing username and password.
-
-Start chatting with other online users in real-time.
-
-View the list of online users on the right side of the chat interface.
-
-Chatt also in privacy by clicking on usernames (work in progress).
-
-See in real time when another user is typing a message. 
-
-## Features
-
-User Authentication: Users can sign up and log in securely with a username and password (Users that are already present in the database have the username as password aswell).
-
-Real-time Chat: Utilizes Socket.IO for real-time communication, enabling users to exchange messages instantly.
-
-Persistent Data: Messages are stored in an SQLite database, ensuring that chat history is retained even if users disconnect and reconnect.
-
-User List: Displays a list of online users, allowing participants to see who is currently connected.
+Team project (Telecom Saint-Etienne).
