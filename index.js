@@ -5,7 +5,10 @@ const { join } = require('path');
 const { Server } = require('socket.io');
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
-const bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
+
+// Cost factor for password hashing. Higher = slower to brute-force.
+const SALT_ROUNDS = 12;
 
 // Set to keep track of connected users
 const connectedUsers = new Set();
@@ -28,9 +31,9 @@ async function main() {
   const server = createServer(app);
   const io = new Server(server, { connectionStateRecovery: {} });
 
-  // Configure body-parser middleware to parse POST requests
-  app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(bodyParser.json());
+  // Parse POST bodies (built into Express since 4.16, no extra dependency needed)
+  app.use(express.urlencoded({ extended: false }));
+  app.use(express.json());
 
   // Serve the index.html file
   app.get('/', (req, res) => {
@@ -48,12 +51,30 @@ async function main() {
   });
 
   // User registration
+  // Passwords are never stored as-is: only their bcrypt hash is persisted.
   app.post('/signup', async (req, res) => {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).send('Username and password are required');
+    }
+    if (password.length < 8) {
+      return res.status(400).send('Password must be at least 8 characters long');
+    }
+
     try {
-      await db.run('INSERT INTO users (username, password) VALUES (?, ?)', username, password);
-      res.status(200).send('User registered successfully');
+      // bcrypt generates a unique salt per password, so two identical
+      // passwords produce different hashes and cannot be compared or
+      // cracked with a single precomputed table.
+      const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+      await db.run('INSERT INTO users (username, password) VALUES (?, ?)', username, passwordHash);
+      res.status(201).send('User registered successfully');
     } catch (e) {
+      // The PRIMARY KEY constraint on username is what guarantees uniqueness,
+      // so we let the database decide rather than checking beforehand.
+      if (e && e.code === 'SQLITE_CONSTRAINT') {
+        return res.status(409).send('This username is already taken');
+      }
       res.status(500).send('Error registering user');
     }
   });
@@ -61,16 +82,27 @@ async function main() {
   // User login
   app.post('/login', async (req, res) => {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).send('Username and password are required');
+    }
+
     try {
-      const user = await db.get('SELECT * FROM users WHERE username = ? AND password = ?', username, password);
-      if (user) {
-        connectedUsers.add(username);
-        io.emit('user list', Array.from(connectedUsers));
-        io.emit('login success', username);
-        res.status(200).send('User logged in successfully');
-      } else {
-        res.status(401).send('Invalid username or password');
+      // The password is no longer part of the query: we look the user up by
+      // name, then verify the submitted password against the stored hash.
+      const user = await db.get('SELECT username, password FROM users WHERE username = ?', username);
+      const passwordMatches = user ? await bcrypt.compare(password, user.password) : false;
+
+      if (!passwordMatches) {
+        // Same message whether the user exists or not, so the response
+        // cannot be used to enumerate valid accounts.
+        return res.status(401).send('Invalid username or password');
       }
+
+      connectedUsers.add(username);
+      io.emit('user list', Array.from(connectedUsers));
+      io.emit('login success', username);
+      res.status(200).send('User logged in successfully');
     } catch (e) {
       res.status(500).send('Error logging in');
     }
