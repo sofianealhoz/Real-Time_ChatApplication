@@ -3,11 +3,12 @@
 Real-time chat application with live messaging and typing indicators, built
 on WebSockets.
 
-> **⚠️ Academic project — not production-ready.**
-> This is a school project, kept public as a learning artifact. It is **not**
-> hardened for real-world use and should not be deployed as-is.
+> **Scope — demonstration application.**
+> Built to explore real-time messaging over WebSockets. The scope is
+> intentionally limited to that, so the following are known gaps rather than
+> oversights, and the application is not meant to be deployed as-is.
 >
-> **Known limitations, deliberately documented:**
+> **Known limitations:**
 > - `chat.db` was committed early in the project and is **still tracked**.
 >   It contains **dummy test accounts only** — no real users, no real
 >   credentials, and the message tables are empty. Scheduled for removal from
