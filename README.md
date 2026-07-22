@@ -3,7 +3,7 @@
 Real-time chat application with live messaging and typing indicators, built
 on WebSockets.
 
-> **Scope — demonstration application.**
+> **Scope: demonstration application.**
 > Built to explore real-time messaging over WebSockets. The scope is
 > intentionally limited to that, so the following are known gaps rather than
 > oversights, and the application is not meant to be deployed as-is.
@@ -11,7 +11,7 @@ on WebSockets.
 > **Known limitations:**
 > - `chat.db` was committed early in the project and has since been **removed
 >   from tracking** (`.gitignore` excludes `*.db`). It only ever contained
->   **dummy test accounts** — no real users, no real credentials, and the
+>   **dummy test accounts** only: no real users, no real credentials, and the
 >   message tables were empty. It remains in the earlier commit history.
 > - Sessions are not managed server-side: there is no session token or cookie,
 >   so a client can call the socket API without a verified login.
