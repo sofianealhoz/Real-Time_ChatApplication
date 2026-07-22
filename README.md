@@ -9,10 +9,10 @@ on WebSockets.
 > oversights, and the application is not meant to be deployed as-is.
 >
 > **Known limitations:**
-> - `chat.db` was committed early in the project and is **still tracked**.
->   It contains **dummy test accounts only** — no real users, no real
->   credentials, and the message tables are empty. Scheduled for removal from
->   tracking and from history (`.gitignore` already excludes `*.db`).
+> - `chat.db` was committed early in the project and has since been **removed
+>   from tracking** (`.gitignore` excludes `*.db`). It only ever contained
+>   **dummy test accounts** — no real users, no real credentials, and the
+>   message tables were empty. It remains in the earlier commit history.
 > - Sessions are not managed server-side: there is no session token or cookie,
 >   so a client can call the socket API without a verified login.
 > - No rate limiting, no CSRF protection, no HTTPS enforcement.
