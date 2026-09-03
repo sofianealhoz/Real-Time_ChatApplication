@@ -548,7 +548,9 @@ body::before {
 
 /* --- Petits écrans ------------------------------------------------------- */
 
-@media (max-width: 780px) {
+/* La barre latérale ne disparaît qu'en dessous de 700 px, pour rester visible
+   quand deux fenêtres sont posées côte à côte ou que la page est zoomée. */
+@media (max-width: 700px) {
   .app-shell {
     grid-template-columns: 1fr;
     border-radius: 0;
