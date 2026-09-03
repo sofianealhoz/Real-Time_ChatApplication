@@ -1,13 +1,21 @@
 {
-    "name": "projet-nodejs_ezzar-alhoz",
-    "version": "0.0.1",
-    "description": "my first socket.io app",
-    "type": "commonjs",
-    "dependencies": {
-        "bcryptjs": "^2.4.3",
-        "express": "^4.18.2",
-        "socket.io": "^4.7.3",
-        "sqlite": "^5.1.1",
-        "sqlite3": "^5.1.7"
-    }
+  "name": "realtime-chat",
+  "version": "1.0.0",
+  "description": "Real-time chat: Node.js/Express + Socket.io backend, React frontend, SQLite storage",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "build": "npm --prefix client run build",
+    "client": "npm --prefix client run dev",
+    "reset": "node server/reset.js",
+    "setup": "npm install && npm --prefix client install"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.3"
+  }
 }

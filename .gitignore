@@ -10,6 +10,9 @@ yarn-debug.log*
 .env.local
 .env.*.local
 
+# React build output
+client/dist/
+
 # Local / test databases
 *.db
 *.sqlite

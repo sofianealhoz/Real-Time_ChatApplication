@@ -1,0 +1,562 @@
+/* ===========================================================================
+   Salon en direct, feuille de style unique.
+   Organisation : variables, fond, écran d'accueil, coquille, barre latérale,
+   messages, saisie, animations, responsive.
+   =========================================================================== */
+
+:root {
+  --bg: #0a0c16;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-strong: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.09);
+  --text: #eef1f8;
+  --text-soft: #9aa3b8;
+  --accent: #6366f1;
+  --accent-2: #a855f7;
+  --radius: 18px;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Deux halos colorés qui respirent lentement derrière l'interface. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(60rem 40rem at 15% 10%, rgba(99, 102, 241, 0.28), transparent 60%),
+    radial-gradient(50rem 35rem at 85% 85%, rgba(168, 85, 247, 0.22), transparent 60%),
+    radial-gradient(40rem 30rem at 70% 15%, rgba(6, 182, 212, 0.16), transparent 60%);
+  animation: drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(0, -3%, 0) scale(1.08); }
+}
+
+/* --- Écran d'accueil ----------------------------------------------------- */
+
+.join-screen {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.join-card {
+  width: min(400px, 100%);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+  animation: rise 0.5s ease both;
+}
+
+.join-logo {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.45);
+}
+
+.join-logo-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.join-title {
+  margin: 20px 0 6px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.join-subtitle {
+  max-width: 250px;
+  margin: 0 0 26px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
+.join-input {
+  width: 100%;
+  padding: 14px 16px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.join-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+}
+
+.join-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.join-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(99, 102, 241, 0.4);
+}
+
+.join-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.join-hint {
+  margin: 22px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+/* --- Coquille de l'application ------------------------------------------ */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  width: min(1120px, 100%);
+  height: 100vh;
+  max-height: 900px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: rgba(10, 12, 22, 0.6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(22px);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55);
+  animation: rise 0.5s ease both;
+}
+
+@media (min-height: 940px) {
+  .app-shell { margin-top: 24px; }
+}
+
+/* --- Barre latérale ------------------------------------------------------ */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 18px;
+  background: rgba(0, 0, 0, 0.25);
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.brand-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.user-list {
+  flex: 1;
+  margin-top: 20px;
+  overflow-y: auto;
+}
+
+.user-list-title {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.user-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  transition: background 0.2s;
+  animation: rise 0.3s ease both;
+}
+
+.user-row:hover {
+  background: var(--surface);
+}
+
+.user-name {
+  font-size: 14px;
+}
+
+.user-you {
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 10px;
+  color: var(--text-soft);
+  background: var(--surface-strong);
+  border-radius: 6px;
+}
+
+/* Pastille ronde avec les initiales, couleur calculée depuis le pseudo. */
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+.connection-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text-soft);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.connection-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.is-online .connection-dot {
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  animation: ping 2s ease-out infinite;
+}
+
+.is-offline .connection-dot {
+  background: #f59e0b;
+}
+
+/* --- Panneau de conversation -------------------------------------------- */
+
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* autorise le contenu à rétrécir dans la grille */
+}
+
+.chat-header {
+  padding: 20px 26px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.chat-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.chat-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.message-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 26px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* margin-top auto : tant que la conversation est courte, elle reste posée au
+   bas du panneau ; dès qu'elle dépasse, le conteneur défile normalement. */
+.message-list-inner {
+  margin-top: auto;
+}
+
+.empty-state {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-soft);
+}
+
+/* --- Messages ------------------------------------------------------------ */
+
+.message {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 3px;
+  animation: messageIn 0.32s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.message.starts-group {
+  margin-top: 16px;
+}
+
+/* Mes messages partent de la droite, avatar compris. */
+.message.is-mine {
+  flex-direction: row-reverse;
+}
+
+/* Dans une suite de messages du même auteur, l'avatar reste réservé mais
+   invisible : les bulles restent alignées. */
+.message:not(.starts-group) .message-avatar {
+  visibility: hidden;
+}
+
+.message-content {
+  max-width: min(560px, 74%);
+}
+
+.message.is-mine .message-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.message-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 5px;
+  padding: 0 4px;
+}
+
+.message.is-mine .message-meta {
+  flex-direction: row-reverse;
+}
+
+.message-author {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.message-time {
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+.bubble {
+  padding: 10px 14px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 16px 16px 16px 5px;
+  overflow-wrap: anywhere;
+}
+
+.message.is-mine .bubble {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  border-radius: 16px 16px 5px 16px;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.system-message {
+  margin: 16px 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-soft);
+  animation: messageIn 0.32s ease both;
+}
+
+/* --- Saisie -------------------------------------------------------------- */
+
+.chat-footer {
+  padding: 0 26px 20px;
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 22px;
+  font-size: 12px;
+  color: var(--text-soft);
+  animation: messageIn 0.25s ease both;
+}
+
+.typing-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.typing-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-soft);
+  animation: bounce 1.2s ease-in-out infinite;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+.composer {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.composer-input {
+  flex: 1;
+  padding: 14px 18px;
+  font: inherit;
+  font-size: 14.5px;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.composer-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.16);
+}
+
+.composer-button {
+  padding: 0 24px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.composer-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(99, 102, 241, 0.4);
+}
+
+.composer-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* --- Animations ---------------------------------------------------------- */
+
+@keyframes messageIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%      { transform: scale(0.7); opacity: 0.6; }
+}
+
+@keyframes ping {
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  100% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0);    opacity: 0.5; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+/* --- Barres de défilement ------------------------------------------------ */
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* --- Petits écrans ------------------------------------------------------- */
+
+@media (max-width: 780px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    border-radius: 0;
+    border: none;
+  }
+  .sidebar { display: none; }
+  .message-list { padding: 18px; }
+  .chat-header { padding: 16px 18px; }
+  .chat-footer { padding: 0 18px 16px; }
+  .message-content { max-width: 82%; }
+}
